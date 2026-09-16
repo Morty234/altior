@@ -1,0 +1,220 @@
+<!-- AVISO: esta verificação roda no navegador e pode ser vista por qualquer pessoa no código-fonte. Não é segurança real — serve apenas como rascunho visual até a migração para autenticação de verdade (ex: Clerk + backend). -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALTIOR — Private Vault 01 — Restricted Access</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@200;300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#070709;--panel:#0E0E11;--line:rgba(255,255,255,0.06);--gold:#C9B07A;--gold2:#E8D5A3;--off:#ECE7DD;--stone:#9A9590;--stone2:#6B6763;--serif:'Cormorant Garamond',serif;--sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;--pad:clamp(20px,4vw,72px)}
+  *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{background:var(--bg);color:var(--off);font-family:var(--sans);font-weight:300;line-height:1.6;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}img{display:block;max-width:100%}::selection{background:var(--gold);color:var(--bg)}
+  body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.035;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .wrap{max-width:1440px;margin:0 auto;padding:0 var(--pad);position:relative;z-index:1}
+  header{position:fixed;top:0;left:0;right:0;z-index:40;height:64px;display:flex;align-items:center;border-bottom:1px solid var(--line);background:rgba(7,7,9,0.72);backdrop-filter:blur(20px)}
+  .nav{width:100%;max-width:1440px;margin:0 auto;padding:0 var(--pad);display:flex;justify-content:space-between;align-items:center}
+  .logo{height:20px} .logo img{height:20px}
+  .hdr-link{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--stone);border:1px solid rgba(255,255,255,0.08);padding:8px 14px;transition:all 0.3s}
+  .hdr-link:hover{color:var(--off);border-color:var(--gold)}
+  .gate{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg)}
+  .gate.hidden{display:none}
+  .gate-inner{width:100%;max-width:520px;text-align:center}
+  .gate-eyebrow{font-family:var(--mono);font-size:0.60rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);margin-bottom:18px;display:flex;align-items:center;justify-content:center;gap:12px}
+  .gate-eyebrow::before,.gate-eyebrow::after{content:'';width:24px;height:1px;background:var(--gold);opacity:0.4}
+  .gate-title{font-family:var(--serif);font-size:clamp(2.4rem,6vw,3.6rem);font-weight:300;line-height:0.9;letter-spacing:-0.02em}
+  .gate-title em{font-style:italic;color:var(--gold)}
+  .gate-sub{font-size:0.86rem;color:var(--stone);margin:14px auto 0;max-width:38ch;line-height:1.7}
+  .gate-box{margin-top:28px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.01);padding:22px}
+  .gate-input{width:100%;background:#0A0A0C;border:1px solid rgba(255,255,255,0.08);color:var(--off);padding:16px;font-family:var(--mono);font-size:0.92rem;letter-spacing:0.18em;text-transform:uppercase;text-align:center}
+  .gate-input:focus{outline:none;border-color:var(--gold);background:rgba(201,176,122,0.04)}
+  .gate-btn{margin-top:12px;width:100%;padding:16px;background:var(--gold);color:#070709;border:1px solid var(--gold);font-family:var(--mono);font-size:0.68rem;letter-spacing:0.18em;text-transform:uppercase;font-weight:600;cursor:pointer;transition:all 0.3s}
+  .gate-btn:hover{background:var(--off);border-color:var(--off)}
+  .gate-error{margin-top:10px;min-height:1.2em;color:#FF8A8A;font-size:0.76rem;font-family:var(--mono)}
+  .gate-hint{margin-top:14px;font-family:var(--mono);font-size:0.60rem;color:var(--stone2);letter-spacing:0.06em}
+  .content{opacity:0;pointer-events:none;filter:blur(8px);transition:all 0.8s cubic-bezier(.16,.8,.24,1)}
+  .content.unlocked{opacity:1;pointer-events:auto;filter:none}
+  .hero{padding:120px 0 0}
+  .hero-top{border-bottom:1px solid var(--line);padding-bottom:32px;display:grid;grid-template-columns:1.1fr 0.9fr;gap:48px;align-items:end}
+  .hero-kicker{font-family:var(--mono);font-size:0.60rem;letter-spacing:0.24em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+  .hero-title{font-family:var(--serif);font-size:clamp(3rem,6.5vw,5.8rem);font-weight:300;line-height:0.82;letter-spacing:-0.04em}
+  .hero-title em{font-style:italic;color:var(--gold)}
+  .hero-desc{max-width:42ch;color:var(--stone);margin-top:18px;line-height:1.8}
+  .hero-visual{position:relative;border:1px solid var(--line);background:var(--panel);padding:8px}
+  .hero-visual img{width:100%;aspect-ratio:1.2/1;object-fit:cover;filter:brightness(0.9)}
+  @media(max-width:900px){.hero-top{grid-template-columns:1fr}}
+  .collection{padding:48px 0 20px}
+  .vault-list{display:flex;flex-direction:column;gap:2px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.06)}
+  .lot{position:relative;display:grid;grid-template-columns:1.15fr 0.85fr;gap:0;background:var(--panel);overflow:hidden}
+  .lot-media{position:relative;aspect-ratio:1.35/1;overflow:hidden;background:#050507}
+  .lot-media img{width:100%;height:100%;object-fit:cover;filter:brightness(0.88)}
+  .lot-info{padding:32px;display:flex;flex-direction:column;justify-content:center;gap:12px;border-left:1px solid var(--line)}
+  .lot-price{margin-top:8px;display:flex;align-items:baseline;gap:10px}
+  .lot-price strong{font-family:var(--serif);font-size:1.8rem;font-weight:300}
+  .lot-btn{flex:1;padding:14px 18px;font-family:var(--mono);font-size:0.66rem;letter-spacing:0.14em;text-transform:uppercase;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer}
+  .tray{position:sticky;bottom:16px;z-index:20;margin-top:32px;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 18px;background:rgba(14,14,17,0.92);backdrop-filter:blur(18px);border:1px solid rgba(201,176,122,0.14)}
+  .overlay{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(7,7,9,0.86);backdrop-filter:blur(18px)}
+  .overlay.open{display:flex}
+  .modal{width:100%;max-width:560px;max-height:92vh;overflow:auto;background:#0A0A0C;border:1px solid rgba(255,255,255,0.06);padding:28px}
+  .field{margin-bottom:12px}
+  .field label{font-family:var(--mono);font-size:0.60rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--stone);margin-bottom:6px;display:block}
+  .field input,.field textarea{width:100%;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);color:var(--off);padding:12px 14px;font-size:0.92rem}
+  .btn{flex:1;padding:14px;border:1px solid var(--gold);background:var(--gold);color:#070709;font-family:var(--mono);font-size:0.68rem;letter-spacing:0.14em;text-transform:uppercase;font-weight:600;cursor:pointer}
+  .btn-ghost{background:transparent;color:var(--off);border-color:rgba(255,255,255,0.12)}
+  .success{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(7,7,9,0.88);backdrop-filter:blur(20px);text-align:center}
+  .success.open{display:flex}
+  footer{padding:24px 0 40px;border-top:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-family:var(--mono);font-size:0.60rem;color:var(--stone2)}
+</style>
+</head>
+<body>
+<header>
+  <div class="nav">
+    <a href="index.html" class="logo"><img src="assets/img/altior-wordmark-gold.jpg" alt="ALTIOR"></a>
+    <a href="index.html" class="hdr-link">← Maison</a>
+  </div>
+</header>
+<div id="gate" class="gate">
+  <div class="gate-inner">
+    <p class="gate-eyebrow">Vault 01 • Invitation Only</p>
+    <h1 class="gate-title">Private <em>Vault</em> — Restricted</h1>
+    <p class="gate-sub">This vault is sealed. Access is granted <strong style="color:var(--off)">only with owner permission</strong>.</p>
+    <div class="gate-box">
+      <input id="gateCode" class="gate-input" type="text" placeholder="ENTER OWNER CODE" autocomplete="off" maxlength="24">
+      <button id="gateBtn" class="gate-btn">Decrypt Collection →</button>
+      <p class="gate-error" id="gateError"></p>
+      <p class="gate-hint">Access by permission only. Request via <a href="private-estate.html" style="color:var(--gold);text-decoration:underline">Private Estate</a> → owner will send you a personal code.</p>
+    </div>
+  </div>
+</div>
+<main id="content" class="content">
+  <section class="hero wrap">
+    <div class="hero-top">
+      <div>
+        <p class="hero-kicker">Vault 01 — Malibu to Aspen • Confidential</p>
+        <h1 class="hero-title"><span class="line">The vault is</span><span class="line" style="color:var(--gold);font-style:italic">not a store.</span><span class="line">It’s a selection.</span></h1>
+        <p class="hero-desc">No listings. No brokers. Each lot is a confidential work. Decrypt, add to vault, and initiate a single acquisition under NDA and escrow.</p>
+      </div>
+      <div class="hero-visual">
+        <img src="assets/img/altior-house-edition-01.jpg" alt="ALTIOR House">
+      </div>
+    </div>
+  </section>
+  <section class="collection wrap">
+    <div class="vault-list" id="vaultGrid">
+      <article class="lot" data-id="meridian" data-name="Villa Meridian" data-price="24500000" data-loc="Malibu, CA" data-cat="ocean">
+        <div class="lot-media"><img src="https://images.unsplash.com/photo-1613977257363-707ba9348227?q=80&w=1600&auto=format&fit=crop" alt=""><span style="position:absolute;top:16px;left:16px;background:rgba(7,7,9,0.72);padding:6px 10px;font-family:var(--mono);font-size:0.60rem">Lot 01</span></div>
+        <div class="lot-info"><p style="font-family:var(--mono);font-size:0.60rem;color:var(--gold)">Malibu — Carbon Beach</p><h3 style="font-family:var(--serif);font-size:2rem;font-weight:300">Villa Meridian</h3><p style="color:var(--stone)">6 en-suite • 8,200 sq ft • 72ft infinity edge</p><div class="lot-price"><strong>$24.5M</strong></div><button class="lot-btn" data-buy="meridian">Add to Vault</button></div>
+      </article>
+    </div>
+    <div class="tray" id="vaultTray">
+      <div><strong id="trayCount">0 lots selected</strong> <span id="trayIds" style="font-family:var(--mono);font-size:0.60rem;color:var(--gold)"></span></div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div id="trayPrice" style="font-family:var(--serif);font-size:1.3rem">—</div>
+        <button id="checkoutBtn" class="btn" disabled>Initiate Acquisition →</button>
+      </div>
+    </div>
+  </section>
+</main>
+<div id="checkoutOverlay" class="overlay">
+  <div class="modal">
+    <h3>Confidential <em>Acquisition</em></h3>
+    <div id="orderList"></div>
+    <form id="checkoutForm" novalidate>
+      <div class="field"><label>Full name *</label><input id="cName" required placeholder="Your full name" autocomplete="name"></div>
+      <div class="field"><label>Email *</label><input id="cEmail" type="email" required placeholder="you@email.com" autocomplete="email"></div>
+      <div class="field"><label>Phone / WhatsApp *</label><input id="cPhone" type="tel" required placeholder="+1 (555) 000-0000" autocomplete="tel"></div>
+      <div class="field"><label>Tell us about yourself *</label><textarea id="cMsg" required rows="4" placeholder="Tell us about yourself — what you do, what you're looking for, timing and preferences."></textarea></div>
+      <p id="checkoutError" style="color:#FF8A8A;font-size:0.78rem;min-height:1em"></p>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button type="button" id="closeCheckout" class="btn btn-ghost">Cancel</button>
+        <button type="submit" class="btn">Confirm & Unlock Access →</button>
+      </div>
+    </form>
+  </div>
+</div>
+<div id="success" class="success"><div style="max-width:480px;background:#0A0A0C;border:1px solid rgba(201,176,122,0.14);padding:32px"><h3>Acquisition <em>sealed.</em></h3><p style="color:var(--stone);margin-top:10px">Sealed in Vault 01. Private Office will contact you within 48 hours.</p><p style="margin-top:12px;font-family:var(--mono);font-size:0.60rem;color:var(--stone2)">REF: <span id="refCode" style="color:var(--gold)"></span></p><button id="closeSuccess" class="btn" style="margin-top:18px;width:100%">Return to Vault</button></div></div>
+<script>
+(function(){
+  const gate=document.getElementById('gate'), gateCode=document.getElementById('gateCode'), gateBtn=document.getElementById('gateBtn'), gateError=document.getElementById('gateError'), content=document.getElementById('content');
+  const LS='altior_vault_unlocked_v3';
+  if(localStorage.getItem(LS)==='1'){ gate.classList.add('hidden'); content.classList.add('unlocked'); }
+  function tryUnlock(){
+    const v=(gateCode.value||'').trim().toUpperCase();
+    if(['HENRIQUE-2026','ALTIOR-2026','ALTIOR2026','ALTIOR-OWNER'].includes(v)){
+      gate.classList.add('hidden'); content.classList.add('unlocked'); localStorage.setItem(LS,'1');
+    } else { gateError.textContent='Invalid code. Access by owner permission only. Request via Private Estate.'; }
+  }
+  gateBtn.addEventListener('click',tryUnlock);
+  gateCode.addEventListener('keydown',e=>{ if(e.key==='Enter') tryUnlock() });
+  const cart=new Map();
+  const trayCount=document.getElementById('trayCount'), trayIds=document.getElementById('trayIds'), trayPrice=document.getElementById('trayPrice'), checkoutBtn=document.getElementById('checkoutBtn'), orderList=document.getElementById('orderList');
+  function fmt(n){ return '$' + (n/1000000).toFixed(1) + 'M' }
+  function updateCart(){
+    const c=cart.size; let total=0; cart.forEach(v=>total+=v.price);
+    trayCount.textContent=c? c+' lots selected':'0 lots selected';
+    trayIds.textContent=c? ' • ' + [...cart.keys()].join(' • ').toUpperCase() : '';
+    trayPrice.textContent=c? fmt(total) : '—';
+    checkoutBtn.disabled=c===0;
+    if(orderList){
+      orderList.innerHTML='';
+      let sum=0;
+      cart.forEach(v=>{ sum+=v.price; const d=document.createElement('div'); d.style.cssText='display:flex;justify-content:space-between;padding:12px;border-bottom:1px solid var(--line)'; d.innerHTML='<span>'+v.name+'</span><span>'+fmt(v.price)+'</span>'; orderList.appendChild(d); });
+      const t=document.createElement('div'); t.style.cssText='padding:14px;background:rgba(201,176,122,0.06);display:flex;justify-content:space-between;font-weight:600'; t.innerHTML='<span>Total Vault</span><span>'+fmt(sum)+'</span>'; orderList.appendChild(t);
+    }
+  }
+  document.addEventListener('click',e=>{
+    if(e.target.classList.contains('lot-btn') && e.target.dataset.buy){
+      const btn=e.target; const card=btn.closest('.lot'); const id=card.dataset.id, name=card.dataset.name, price=parseInt(card.dataset.price,10), loc=card.dataset.loc;
+      if(cart.has(id)) cart.delete(id); else cart.set(id,{name,price,loc});
+      updateCart();
+    }
+  });
+  const overlay=document.getElementById('checkoutOverlay'), closeCheckout=document.getElementById('closeCheckout'), checkoutForm=document.getElementById('checkoutForm'), checkoutError=document.getElementById('checkoutError'), success=document.getElementById('success'), refCode=document.getElementById('refCode');
+  checkoutBtn.addEventListener('click',()=>{ if(cart.size===0) return; updateCart(); overlay.classList.add('open'); });
+  closeCheckout.addEventListener('click',()=> overlay.classList.remove('open'));
+  overlay.addEventListener('click',e=>{ if(e.target===overlay) overlay.classList.remove('open') });
+  const OWNER_EMAIL='henriqueu635@gmail.com';
+  checkoutForm.addEventListener('submit',async e=>{
+    e.preventDefault();
+    const name=document.getElementById('cName').value.trim();
+    const email=document.getElementById('cEmail').value.trim();
+    const ph=document.getElementById('cPhone').value.trim();
+    const msg=document.getElementById('cMsg').value.trim();
+    if(!name){ checkoutError.textContent='Please enter your full name.'; return; }
+    if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ checkoutError.textContent='Please enter a valid email.'; return; }
+    if(ph.replace(/\D/g,'').length<10){ checkoutError.textContent='Please enter a valid phone / WhatsApp.'; return; }
+    if(!msg || msg.length<10){ checkoutError.textContent='Tell us about yourself — please write at least 10 characters.'; return; }
+    checkoutError.textContent='';
+    const ref='ALTIOR-V01-'+Math.random().toString(36).slice(2,6).toUpperCase()+'-'+Date.now().toString().slice(-4);
+    refCode.textContent=ref;
+    const lead={ name, email, phone:ph, message:msg, ref, items:[...cart.values()], at:new Date().toISOString() };
+    try{
+      const arr=JSON.parse(localStorage.getItem('altior_acquisitions')||'[]');
+      arr.push({ref, items:[...cart.values()], customer:{first:name, last:'', email, phone:ph, message:msg}, at:lead.at});
+      localStorage.setItem('altior_acquisitions', JSON.stringify(arr));
+      const leads=JSON.parse(localStorage.getItem('altior_leads')||'[]');
+      leads.push({name, email, phone:ph, message:msg, ref, source:'vault-checkout', at:lead.at});
+      localStorage.setItem('altior_leads', JSON.stringify(leads));
+      localStorage.setItem('altior_vault_unlocked_v3','1');
+    }catch(err){}
+    try{
+      const fd=new FormData();
+      fd.append('name', name); fd.append('email', email); fd.append('phone', ph); fd.append('message', msg);
+      fd.append('ref', ref); fd.append('vault_items', [...cart.values()].map(i=>i.name).join(', '));
+      fd.append('_subject','ALTIOR Vault — New order: '+name+' ('+email+') — '+ref);
+      fd.append('_template','table'); fd.append('_captcha','false');
+      if(OWNER_EMAIL.includes('@')){
+        const r=await fetch('https://formsubmit.co/ajax/'+encodeURIComponent(OWNER_EMAIL),{method:'POST', body:fd, headers:{'Accept':'application/json'}});
+        const j=await r.json().catch(()=>null); console.log('[VAULT] FormSubmit', r.status, j);
+      }
+    }catch(err){ console.warn('[VAULT] FormSubmit failed',err); }
+    overlay.classList.remove('open');
+    success.classList.add('open');
+    cart.clear(); updateCart();
+    checkoutForm.reset();
+  });
+  document.getElementById('closeSuccess').addEventListener('click',()=> success.classList.remove('open'));
+})();
+</script>
+</body>
+</html>

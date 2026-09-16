@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALTIOR — Acesso Privado | Vault 01</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#050507;--panel:rgba(14,14,17,0.44);--line:rgba(255,255,255,0.06);--line-gold:rgba(201,176,122,0.25);
+    --gold:#C9B07A;--gold2:#E8D5A3;--off:#ECE7DD;--stone:#9A9590;--stone2:#5A5752;
+    --serif:'Cormorant Garamond',serif;--sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+    --ease:cubic-bezier(.16,.8,.24,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    min-height:100vh;background:var(--bg);color:var(--off);font-family:var(--sans);font-weight:300;
+    display:grid;place-items:center;padding:24px;overflow:hidden;position:relative;
+  }
+  /* — Fundo vivo profundo + vinhetas — */
+  body::before{
+    content:'';position:fixed;inset:0;z-index:-3;
+    background:
+      radial-gradient(1100px 700px at 70% -10%, rgba(201,176,122,0.08), transparent 60%),
+      radial-gradient(800px 600px at -10% 100%, rgba(201,176,122,0.045), transparent 65%),
+      linear-gradient(180deg, #050507 0%, #070709 45%, #0A0A0C 100%);
+  }
+  /* Glow orbital que segue o cursor */
+  #orb{
+    position:fixed;width:900px;height:900px;left:-450px;top:-450px;pointer-events:none;z-index:-2;opacity:0;
+    background:radial-gradient(circle, rgba(201,176,122,0.04) 0%, rgba(201,176,122,0.02) 25%, transparent 70%);
+    transition:opacity .6s var(--ease);will-change:transform;
+  }
+  body.has-orb #orb{opacity:1}
+  /* Ruído cinematográfico */
+  .noise{
+    position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0.035;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  canvas#particles{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0.55}
+  /* Top bar ultrafina */
+  .top{
+    position:fixed;top:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 clamp(20px,4vw,40px);border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(5,5,7,0.32);backdrop-filter:blur(16px);z-index:10;
+  }
+  .top img{height:18px;opacity:0.96;filter:brightness(1.04)}
+  .top-link{font-family:var(--mono);font-size:0.60rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--stone);border:1px solid rgba(255,255,255,0.07);padding:8px 14px;transition:all .3s var(--ease);text-decoration:none}
+  .top-link:hover{color:var(--off);border-color:rgba(201,176,122,0.22);background:rgba(201,176,122,0.04)}
+  /* — Card Frosted Obsidian Glass — */
+  .wrap{width:100%;max-width:480px;position:relative;z-index:1}
+  .card{
+    position:relative;padding:40px 36px 30px;
+    background:var(--panel);
+    backdrop-filter:blur(28px) saturate(120%);
+    -webkit-backdrop-filter:blur(28px) saturate(120%);
+    border:1px solid transparent;
+    background-clip:padding-box;
+    box-shadow:
+      0 40px 100px rgba(0,0,0,0.62),
+      0 1px 0 rgba(255,255,255,0.05) inset,
+      0 -1px 0 rgba(255,255,255,0.02) inset;
+    overflow:hidden;
+    animation:enter .7s var(--ease) both;
+  }
+  /* Borda degradê ouro acetinado escovado */
+  .card::before{
+    content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;
+    background:linear-gradient(135deg, rgba(201,176,122,0.25), rgba(255,255,255,0.02) 55%, rgba(201,176,122,0.12));
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;
+  }
+  /* Relevo interno */
+  .card::after{
+    content:'';position:absolute;inset:1px;pointer-events:none;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 12px rgba(0,0,0,0.35);opacity:0.9;
+  }
+  @keyframes enter{from{opacity:0;transform:translateY(14px) scale(0.985);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
+  .eyebrow{
+    font-family:var(--mono);font-size:0.58rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);
+    display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:20px;
+  }
+  .eyebrow::before,.eyebrow::after{content:'';width:22px;height:1px;background:linear-gradient(90deg, transparent, var(--gold));opacity:0.45}
+  .eyebrow::after{background:linear-gradient(90deg, var(--gold), transparent)}
+  .logo{margin:0 auto 16px;display:grid;place-items:center}
+  .logo img{height:22px;filter:brightness(1.06) contrast(1.02)}
+  .title{
+    font-family:var(--serif);font-size:clamp(1.95rem,5vw,2.55rem);font-weight:300;line-height:0.95;letter-spacing:0.06em;text-align:center;
+  }
+  .title em{font-style:italic;color:var(--gold);font-weight:300;letter-spacing:0.04em}
+  .sub{margin:12px auto 0;max-width:34ch;text-align:center;color:var(--stone);font-size:0.86rem;line-height:1.75}
+  /* — One-Field Smart Input — */
+  .form{margin-top:30px;transition:opacity .45s var(--ease), transform .45s var(--ease)}
+  .form.out{opacity:0;transform:scale(0.98) translateY(6px);pointer-events:none}
+  .field{position:relative}
+  .field label{
+    font-family:var(--mono);font-size:0.60rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--stone);
+    margin-bottom:10px;display:flex;align-items:center;gap:8px;
+  }
+  .field label::before{content:'';width:7px;height:1px;background:var(--gold);opacity:0.55}
+  .input-wrap{position:relative}
+  .input{
+    width:100%;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);
+    color:var(--off);padding:16px 46px 16px 16px;font-size:0.95rem;font-family:var(--sans);letter-spacing:0.02em;
+    transition:border-color .35s var(--ease), background .35s var(--ease), box-shadow .35s var(--ease);
+  }
+  .input::placeholder{color:rgba(154,149,144,0.42)}
+  .input:hover{border-color:rgba(255,255,255,0.11);background:rgba(255,255,255,0.03)}
+  .input:focus{outline:none;border-color:var(--gold);background:rgba(201,176,122,0.06);box-shadow:0 0 0 4px rgba(201,176,122,0.10)}
+  .input-icon{
+    position:absolute;right:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--stone2);opacity:0.9;pointer-events:none;
+  }
+  .input:focus ~ .input-icon{color:var(--gold)}
+  .hint{
+    margin-top:10px;display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:0.58rem;letter-spacing:0.12em;color:var(--stone2);
+  }
+  .hint i{width:5px;height:5px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px rgba(201,176,122,0.55)}
+  /* Botões */
+  .btn-primary{
+    margin-top:18px;width:100%;padding:16px;background:linear-gradient(135deg, var(--gold), var(--gold2));
+    color:#070709;border:1px solid var(--gold);font-family:var(--mono);font-size:0.68rem;letter-spacing:0.18em;text-transform:uppercase;font-weight:600;
+    cursor:pointer;position:relative;overflow:hidden;transition:transform .35s var(--ease), box-shadow .35s var(--ease), filter .35s var(--ease);
+    box-shadow:0 12px 32px rgba(201,176,122,0.20);
+  }
+  .btn-primary::before{
+    content:'';position:absolute;inset:0;background:linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+    transform:translateX(-100%);transition:transform .7s var(--ease);
+  }
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 16px 40px rgba(201,176,122,0.26);filter:brightness(1.03)}
+  .btn-primary:hover::before{transform:translateX(100%)}
+  .btn-primary:active{transform:translateY(0)}
+  .btn-biometric{
+    margin-top:12px;width:100%;padding:13px;background:rgba(255,255,255,0.015);color:var(--off);
+    border:1px solid rgba(255,255,255,0.08);font-family:var(--mono);font-size:0.64rem;letter-spacing:0.14em;text-transform:uppercase;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .35s var(--ease);
+  }
+  .btn-biometric:hover{border-color:rgba(201,176,122,0.22);background:rgba(201,176,122,0.05);color:var(--gold)}
+  .btn-biometric:active{transform:scale(0.985)}
+  .btn-biometric.verifying{pointer-events:none;opacity:0.9}
+  .btn-biometric svg{width:16px;height:16px;stroke-width:1.2}
+  /* Erro jamais gritante — usamos dourado fosco e fade, nunca vermelho puro */
+  .error{
+    min-height:1.2em;margin-top:12px;text-align:center;font-family:var(--mono);font-size:0.70rem;letter-spacing:0.04em;color:#E8C9A0;
+    opacity:0;transform:translateY(4px);transition:all .35s var(--ease);
+  }
+  .error.show{opacity:1;transform:none}
+  .foot{margin-top:22px;text-align:center;font-family:var(--mono);font-size:0.56rem;color:var(--stone2);letter-spacing:0.06em;line-height:1.7}
+  .foot a{color:var(--stone);text-decoration:underline;text-underline-offset:3px;transition:color .2s}
+  .foot a:hover{color:var(--gold)}
+  /* — Tela de transição Vault Unlocked — */
+  .vault-unlocked{
+    position:absolute;inset:0;display:grid;place-items:center;padding:32px;text-align:center;
+    opacity:0;transform:scale(0.985);pointer-events:none;transition:all .55s var(--ease);
+  }
+  .vault-unlocked.open{opacity:1;transform:none;pointer-events:auto}
+  .vault-badge{
+    width:56px;height:56px;border:1px solid var(--gold);display:grid;place-items:center;color:var(--gold);
+    background:rgba(201,176,122,0.08);margin:0 auto 14px;box-shadow:0 0 0 8px rgba(201,176,122,0.06);
+  }
+  .vault-title{font-family:var(--serif);font-size:1.9rem;font-weight:300;letter-spacing:0.04em}
+  .vault-title em{font-style:italic;color:var(--gold)}
+  .vault-sub{margin-top:8px;color:var(--stone);font-size:0.86rem;line-height:1.7;max-width:32ch;margin-left:auto;margin-right:auto}
+  .vault-line{margin:16px auto 0;width:40px;height:1px;background:linear-gradient(90deg, transparent, var(--gold), transparent);opacity:0.6}
+  @media(max-width:560px){.card{padding:32px 22px 26px}}
+</style>
+</head>
+<body>
+<div id="orb" aria-hidden="true"></div>
+<canvas id="particles" aria-hidden="true"></canvas>
+<div class="noise" aria-hidden="true"></div>
+
+<header class="top">
+  <a href="index.html" aria-label="ALTIOR"><img src="assets/img/altior-wordmark-gold.jpg" alt="ALTIOR"></a>
+  <a href="index.html" class="top-link">← Maison</a>
+</header>
+
+<main class="wrap">
+  <div class="card" id="card" role="dialog" aria-labelledby="t">
+    <!-- Estado do formulário -->
+    <div id="formState">
+      <p class="eyebrow">Vault 01 • Exclusividade Criptografada</p>
+      <div class="logo"><img src="assets/img/altior-wordmark-gold.jpg" alt="ALTIOR"></div>
+      <h1 id="t" class="title">Entrada <em>majestosa</em></h1>
+      <p class="sub">Um único campo. Código de convite ou e-mail — acesso instantâneo, sem fricção.</p>
+
+      <form id="loginForm" class="form" novalidate autocomplete="on">
+        <div class="field">
+          <label for="cred">Código de Convite Privado ou E-mail</label>
+          <div class="input-wrap">
+            <input id="cred" class="input" type="text" placeholder="seu@email.com" autocomplete="username" spellcheck="false" required>
+            <!-- ícone minimalista 1px -->
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+              <path d="M7 10V8a5 5 0 0 1 10 0v2"/><rect x="5" y="10" width="14" height="9" rx="1.6"/>
+              <circle cx="12" cy="14.5" r="1.4"/>
+            </svg>
+          </div>
+          <p class="hint"><i></i> Vault privado • Criptografia de convite • Sem senha secundária</p>
+        </div>
+
+        <button id="submitBtn" type="submit" class="btn-primary">Entrar no acervo privado →</button>
+        <button id="bioBtn" type="button" class="btn-biometric" aria-label="Usar Face ID">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+            <path d="M12 11a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/><path d="M12 2a7 7 0 0 0-7 7v3a7 7 0 0 0 14 0V9a7 7 0 0 0-7-7Z"/><path d="M8 14a4 4 0 0 0 8 0"/><path d="M9 9h.01M15 9h.01"/>
+          </svg>
+          Usar Face ID / Biometria
+        </button>
+        <p id="error" class="error" aria-live="polite"></p>
+      </form>
+
+      <p class="foot">Acesso por convite. Solicite via <a href="private-estate.html">Private Estate</a>.</p>
+    </div>
+
+    <!-- Estado Vault Unlocked -->
+    <div id="vaultState" class="vault-unlocked" aria-hidden="true">
+      <div>
+        <div class="vault-badge">◈</div>
+        <h2 class="vault-title">Acesso <em>concedido</em></h2>
+        <p class="vault-sub">Bem-vindo ao <strong style="color:var(--off)">acervo privado</strong>. Abrindo o vault…</p>
+        <div class="vault-line"></div>
+        <p style="margin-top:14px;font-family:var(--mono);font-size:0.60rem;letter-spacing:0.18em;color:var(--gold)">VAULT 01 • DESCRIPTOGRAFADO</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+(function(){
+  const input = document.getElementById('cred') || document.getElementById('smartInput');
+  const form = document.getElementById('loginForm');
+  const formState = document.getElementById('formState');
+  const vaultState = document.getElementById('vaultState');
+  const error = document.getElementById('error');
+  const orb = document.getElementById('orb');
+  const canvas = document.getElementById('particles');
+  const bio = document.getElementById('bioBtn');
+
+  // — Autofocus imediato —
+  setTimeout(()=> input.focus(), 80);
+
+  // — Glow orbital segue o cursor —
+  let hasOrb = false;
+  window.addEventListener('mousemove', e=>{
+    if(!hasOrb){ document.body.classList.add('has-orb'); hasOrb=true; }
+    const x = e.clientX, y = e.clientY;
+    orb.style.transform = `translate(${x}px, ${y}px)`;
+  }, {passive:true});
+
+  // — Partículas sutis em suspensão —
+  (function(){
+    const ctx = canvas.getContext('2d');
+    let w, h, dpr, pts=[];
+    function resize(){
+      dpr = Math.min(window.devicePixelRatio||1, 1.6);
+      w = canvas.width = innerWidth * dpr;
+      h = canvas.height = innerHeight * dpr;
+      canvas.style.width = innerWidth+'px'; canvas.style.height = innerHeight+'px';
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      pts = Array.from({length: 42}, ()=>({
+        x: Math.random()*innerWidth, y: Math.random()*innerHeight,
+        vx: (Math.random()-0.5)*0.18, vy: (Math.random()-0.5)*0.18,
+        r: Math.random()*1.1 + 0.3, a: Math.random()*0.35 + 0.08
+      }));
+    }
+    function tick(){
+      ctx.clearRect(0,0,innerWidth,innerHeight);
+      for(const p of pts){
+        p.x += p.vx; p.y += p.vy;
+        if(p.x<0||p.x>innerWidth) p.vx*=-1;
+        if(p.y<0||p.y>innerHeight) p.vy*=-1;
+        ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fillStyle=`rgba(201,176,122,${p.a})`;ctx.fill();
+      }
+      // linhas ultra-finas entre pontos próximos
+      for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){
+        const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y, d=Math.hypot(dx,dy);
+        if(d<120){ ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);
+          ctx.strokeStyle=`rgba(201,176,122,${(1-d/120)*0.06})`;ctx.lineWidth=0.6;ctx.stroke(); }
+      }
+      requestAnimationFrame(tick);
+    }
+    resize(); tick();
+    addEventListener('resize', resize);
+  })();
+
+  // — Single-Input Form: sem senha, pass-through instantâneo —
+
+  function showError(msg){
+    error.textContent = msg;
+    error.classList.add('show');
+    error.animate([{transform:'translateY(0)'},{transform:'translateY(1px)'},{transform:'translateY(0)'}],{duration:320,easing:'cubic-bezier(.16,.8,.24,1)'});
+  }
+  function clearError(){ error.textContent=''; error.classList.remove('show'); }
+
+  function persist(){
+    try{
+      localStorage.setItem('altior_user_logged','1');
+      localStorage.setItem('altior_vault_unlocked','1');
+      localStorage.setItem('altior_vault_unlocked_v3','1');
+      const v = (input.value||'').trim();
+      if(v) localStorage.setItem('altior_user_email', v);
+      document.cookie = "altior_user_logged=1; path=/; max-age=31536000; SameSite=Lax";
+    }catch(e){}
+  }
+
+  function go(){
+    persist();
+    formState.style.transition = 'opacity .42s cubic-bezier(.16,.8,.24,1), transform .42s cubic-bezier(.16,.8,.24,1)';
+    formState.style.opacity = '0';
+    formState.style.transform = 'scale(0.985) translateY(4px)';
+    setTimeout(()=>{
+      formState.style.display='none';
+      vaultState.classList.add('open');
+      vaultState.setAttribute('aria-hidden','false');
+    }, 320);
+    setTimeout(()=> location.replace('index.html'), 900);
+  }
+
+  form.addEventListener('submit', e=>{
+    e.preventDefault();
+    clearError();
+    const v = (input.value||'').trim();
+    if(!v){
+      showError('Por favor, informe seu código de convite ou e-mail.');
+      input.focus();
+      return;
+    }
+    // fricção zero: qualquer valor preenchido libera imediatamente
+    go();
+  });
+
+  input.addEventListener('keydown', e=>{
+    if(e.key==='Enter'){ e.preventDefault(); form.requestSubmit(); }
+  });
+
+  // — Biometria: libera em <400ms sem exigir campo —
+  bio.addEventListener('click', async ()=>{
+    clearError();
+    bio.classList.add('verifying');
+    const original = bio.innerHTML;
+    bio.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="width:16px;height:16px"><path d="M12 11a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/><path d="M12 2a7 7 0 0 0-7 7v3a7 7 0 0 0 14 0V9a7 7 0 0 0-7-7Z"/></svg> Verificando Face ID…';
+    try{ await new Promise(r=> setTimeout(r, 320)); }catch(e){}
+    bio.innerHTML = original;
+    bio.classList.remove('verifying');
+    // não exige campo — persist e go direto
+    try{
+      localStorage.setItem('altior_user_logged','1');
+      localStorage.setItem('altior_vault_unlocked','1');
+      localStorage.setItem('altior_vault_unlocked_v3','1');
+      document.cookie = "altior_user_logged=1; path=/; max-age=31536000; SameSite=Lax";
+    }catch(e){}
+    formState.style.transition = 'opacity .32s cubic-bezier(.16,.8,.24,1), transform .32s cubic-bezier(.16,.8,.24,1)';
+    formState.style.opacity = '0';
+    formState.style.transform = 'scale(0.985) translateY(4px)';
+    setTimeout(()=>{
+      formState.style.display='none';
+      vaultState.classList.add('open');
+      vaultState.setAttribute('aria-hidden','false');
+    }, 240);
+    setTimeout(()=> location.replace('index.html'), 700);
+  });
+
+  // Persistência: se já logado, não força — mas deixa o campo pronto
+  try{
+    if(localStorage.getItem('altior_user_logged')==='1'){
+      // descomente para auto-skip majestoso:
+      // setTimeout(()=> unlock(''), 200);
+    }
+  }catch(e){}
+})();
+</script>
+</body>
+</html>

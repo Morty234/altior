@@ -1,0 +1,66 @@
+<!-- AVISO: esta verificação roda no navegador e pode ser vista por qualquer pessoa no código-fonte. Não é segurança real — serve apenas como rascunho visual até a migração para autenticação de verdade (ex: Clerk + backend). -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALTIOR — Admin Vault | Control Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#050507;--panel:#0A0A0C;--line:rgba(255,255,255,0.06);--gold:#C9B07A;--off:#ECE7DD;--stone:#9A9590;--serif:'Cormorant Garamond',serif;--sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace}
+  *{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg);color:var(--off);font-family:var(--sans);font-weight:300}
+  .wrap{max-width:1440px;margin:0 auto;padding:0 24px}
+  header{position:sticky;top:0;z-index:40;height:56px;display:flex;align-items:center;border-bottom:1px solid var(--line);background:rgba(5,5,7,0.88);backdrop-filter:blur(16px)}
+  .gate{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(5,5,7,0.92);backdrop-filter:blur(22px)}
+  .gate.hidden{display:none}
+  .gate-card{width:100%;max-width:440px;background:#08080A;border:1px solid rgba(255,255,255,0.07);padding:32px;text-align:center}
+  .btn{font-family:var(--mono);font-size:0.66rem;letter-spacing:0.14em;text-transform:uppercase;padding:10px 18px;border:1px solid var(--gold);background:var(--gold);color:#050507;font-weight:600;cursor:pointer}
+  .btn-ghost{background:transparent;color:var(--off);border-color:rgba(255,255,255,0.12)}
+  .panel{background:var(--panel);padding:24px;border:1px solid rgba(255,255,255,0.04);margin-bottom:12px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;width:100%">
+    <a href="index.html"><img src="assets/img/altior-wordmark-gold.jpg" alt="ALTIOR" style="height:20px"></a>
+    <div style="display:flex;gap:10px"><a href="private-sales.html" class="btn btn-ghost" style="text-decoration:none">View Vault →</a><button id="logout" class="btn btn-ghost" style="display:none">Logout</button></div>
+  </div>
+</header>
+<div id="gate" class="gate">
+  <div class="gate-card">
+    <h1>Admin <em style="font-style:italic;color:var(--gold)">Vault</em></h1>
+    <p style="font-size:0.82rem;color:var(--stone);margin-top:8px">Restricted control center. Enter admin code to manage listings.</p>
+    <div style="margin-top:18px;display:flex;gap:8px">
+      <input id="gateCode" type="password" placeholder="ADMIN CODE" style="flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);color:var(--off);padding:12px 14px;font-family:var(--mono);text-align:center">
+      <button id="gateBtn" class="btn">Unlock</button>
+    </div>
+    <p class="gate-error" id="gateError" style="margin-top:10px;min-height:1em;color:#FF8A8A;font-size:0.76rem"></p>
+  </div>
+</div>
+<main id="dash" class="wrap" style="padding:28px 0;display:none">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+    <div class="panel"><strong id="statTotal">0</strong><br><span style="font-family:var(--mono);font-size:0.60rem;color:var(--stone)">Total Imóveis</span></div>
+    <div class="panel"><strong id="statAcq">0</strong><br><span style="font-family:var(--mono);font-size:0.60rem;color:var(--stone)">Aquisições</span></div>
+  </div>
+  <div id="houseList"></div>
+  <div id="acqList" style="margin-top:16px"></div>
+  <div id="leadList" style="margin-top:16px"></div>
+</main>
+<script>
+(function(){
+  const LS_HOUSES='altior_houses', LS_ACQ='altior_acquisitions', LS_LEADS='altior_leads', LS_ADMIN='altior_admin_unlocked';
+  const gate=document.getElementById('gate'), dash=document.getElementById('dash'), logoutBtn=document.getElementById('logout');
+  function isUnlocked(){ return localStorage.getItem(LS_ADMIN)==='1' }
+  function unlock(){ localStorage.setItem(LS_ADMIN,'1'); gate.classList.add('hidden'); dash.style.display='block'; logoutBtn.style.display='inline-flex'; }
+  function lock(){ localStorage.removeItem(LS_ADMIN); gate.classList.remove('hidden'); dash.style.display='none'; logoutBtn.style.display='none'; }
+  if(isUnlocked()){ gate.classList.add('hidden'); dash.style.display='block'; logoutBtn.style.display='inline-flex'; }
+  document.getElementById('gateBtn').addEventListener('click',()=>{
+    const v=document.getElementById('gateCode').value.trim().toUpperCase();
+    if(['ALTIOR-ADMIN','ADMIN','ALTIOR','ADMIN123'].includes(v)) unlock();
+    else document.getElementById('gateError').textContent='Invalid admin code.';
+  });
+  logoutBtn.addEventListener('click',lock);
+})();
+</script>
+</body>
+</html>
